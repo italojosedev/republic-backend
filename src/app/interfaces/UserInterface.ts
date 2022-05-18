@@ -6,6 +6,7 @@ export interface IUser {
   password: string;
   firstName?: string;
   lastName?: string;
+  republic?: number;
   profileImage?: string;
   phone?: string;
   isAdmin: boolean;
@@ -31,35 +32,4 @@ export interface IUserUpdate {
   addressDistrict?: string;
   addressCity?: string;
   addressState?: string;
-}
-export interface ILessee {
-  id?: number;
-  user: number;
-}
-export interface ILesseeUser {
-  id?: number;
-  user: IUser;
-}
-export interface ILesseeReceivingData {
-  type: string | 'pix' | 'bankAccount';
-  status: boolean;
-  pixType?: string | 'cpf' | 'phone' | 'email' | 'random';
-  pixKey?: string;
-  bankHolderName?: string;
-  bankAgency?: string;
-  bank?: string;
-  bankHolderDocument?: string;
-  bankAccount?: string;
-}
-export interface ILesseeReceivingDataUpdate {
-  type?: string | 'pix' | 'bankAccount';
-  status?: boolean;
-  pixType?: string | 'cpf' | 'phone' | 'email' | 'random';
-  pixKey?: string;
-  bankHolderName?: string;
-  bankAgency?: string;
-  bank?: string;
-  bankHolderDocument?: string;
-  bankAccount?: string;
-  stripeExternalAccount?: string;
 }

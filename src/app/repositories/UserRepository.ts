@@ -11,9 +11,9 @@ import { User, UserTokens } from '@models';
 import { Code } from '@utils';
 
 class UserRepository {
-  private relations: string[] = ['lessee'];
+  private relations: string[] = [];
 
-  async store(body: IUser, republicId: number ): Promise<User> {
+  async store(body: IUser, republicId: number): Promise<User> {
     const connection: Connection = getConnection();
     const queryRunner: QueryRunner = connection.createQueryRunner();
 
@@ -21,7 +21,7 @@ class UserRepository {
     await queryRunner.startTransaction();
 
     try {
-      const { email, password, firstName, lastName} = body;
+      const { email, password, firstName, lastName } = body;
 
       const user: User = queryRunner.manager.create(User, {
         email,
@@ -47,13 +47,14 @@ class UserRepository {
     }
   }
 
-  async list(page: number, itemsPerPage: number): Promise<object> {
+  async listUserByRepublic(republicId: number, page: number, itemsPerPage: number): Promise<object> {
     const connection: Connection = getConnection();
     const queryRunner: QueryRunner = connection.createQueryRunner();
 
     await queryRunner.connect();
 
     const users: User[] = await queryRunner.manager.find(User, {
+      where: { republic: republicId },
       order: {
         createdAt: 'ASC',
       },
@@ -159,7 +160,7 @@ class UserRepository {
       relations: [...this.relations],
     });
 
-    const total: number = await queryRunner.manager.count(User,  {
+    const total: number = await queryRunner.manager.count(User, {
       where: {
         fullName: ILike(`%${name}%`),
         id: Not(userId)
@@ -172,7 +173,7 @@ class UserRepository {
       users,
       total: {
         items: total,
-        pages: Math.round(total / +itemsPerPage) ,
+        pages: Math.round(total / +itemsPerPage),
       },
       currentPage: +page,
       itemsPerPage: +itemsPerPage,
@@ -372,7 +373,7 @@ class UserRepository {
     await queryRunner.connect();
     // @ts-ignore
     const user: User = await queryRunner.manager.findOneOrFail(User, query, {
-      select: ['id', 'firstName', 'lastName', 'fullName', 'password'],
+      select: ['id', 'firstName', 'lastName', 'password'],
     });
 
     await queryRunner.release();

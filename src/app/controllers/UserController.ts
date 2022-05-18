@@ -2,30 +2,23 @@ import { Request, Response } from 'express';
 import { EntityNotFoundError } from 'typeorm';
 import path from 'path';
 import * as Yup from 'yup';
-import { User} from '@models';
+import { User, Republic } from '@models';
+import { IUser } from '@interfaces';
 import { Mailer, Sms, Storage, Token } from '@utils';
 import { UserValidator } from '@validators';
 
 import {
   UserRepository,
   UserTokenRepository,
+  RepublicRepository
 } from '@repositories';
 
-import Stripe from 'stripe';
 
 class UserController {
   async store(req: Request, res: Response): Promise<Response> {
     try {
-      const { profileImage, boatCategories, ...body } = await UserValidator.store(req.body);
-      const { email, acceptedTermsOfUse, acceptedPrivacyPolicy, } = body;
-
-      if (!acceptedPrivacyPolicy) {
-        return res.status(401).json({ message: 'accepted Privacy Policy is required how true' })
-      }
-
-      if (!acceptedTermsOfUse) {
-        return res.status(401).json({ message: 'accepted Terms Of Use is required how true' })
-      }
+      const { profileImage, ...body } = await UserValidator.store(req.body);
+      const { email } = body;
 
       const emailAlreadyExists = await UserRepository.emailExists(
         email.toLowerCase()
@@ -68,24 +61,37 @@ class UserController {
     }
   }
 
+  async list(req: Request, res: Response): Promise<Response> {
+    try {
+      const { user: userAuth } = req.body;
+      const { page = 0, itemsPerPage = 10 } = req.query;
+
+      const user: User = await UserRepository.getById(+userAuth.id);
+
+      const republic: Republic = await RepublicRepository.findOneById(user.republic);
+
+      const users = await UserRepository.listUserByRepublic(republic.id, +page, +itemsPerPage )
+
+      return res.status(200).json(users);
+    } catch (error) {
+      console.log('UserController getById error', error);
+
+      if (error instanceof EntityNotFoundError)
+        return res.status(404).json({ message: 'User not found', error });
+
+      return res.status(500).json({ error });
+    }
+  }
 
   async getById(req: Request, res: Response): Promise<Response> {
     try {
-      const { user: userAuth } = req.body;
+      const { userId } = req.params;
 
-      const user: User = await UserRepository.getById(+userAuth.id);
-      
-      const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-        apiVersion: "2020-08-27"
-      });
+      const user: User = await UserRepository.getById(+userId);
 
-      const stripeAccount = await stripe.accounts.list();
 
       return res.status(200).json({
-        stripeAccount,
-        user: {
-          ...user,
-        }
+        user: user
       });
     } catch (error) {
       console.log('UserController getById error', error);
@@ -152,9 +158,11 @@ class UserController {
 
       const user = await UserRepository.findOneById(isValid);
 
+      const republic: Republic = await RepublicRepository.findOneById(user.republic);
+
       const token: string = await Token.generateUserToken(isValid);
 
-      return res.status(200).json({ userType: 'user', user, token });
+      return res.status(200).json({ userType: 'user', user, republic, token });
     } catch (error) {
       console.log('UserController sign in error', error);
       if (error instanceof EntityNotFoundError)
@@ -293,18 +301,14 @@ class UserController {
           'forgot_password.html'
         );
 
-        await Mailer.sendMail(
-          template,
-          {
-            name: user.fullName,
-            code,
-          },
-          {
-            name: user.fullName,
-            address: email,
-          },
-          'Go Boat - nova senha'
-        );
+        // await Mailer.sendMail(
+        //   template,
+        //   {
+        //     name: 'user.name',
+        //     code,
+        //   },
+        //   'Go Boat - nova senha'
+        // );
       } else if (phone) {
         code = await UserRepository.generateCode(phone, 'phone');
         await Sms.sendTokenSms(phone, code);

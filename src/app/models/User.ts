@@ -74,7 +74,7 @@ export class User {
   isActived?: boolean;
 
   @ManyToOne(() => Republic, republic => republic.users)
-  republic: number | Republic ;
+  republic: number ;
 
   @Column('int', {
     name: 'code',
