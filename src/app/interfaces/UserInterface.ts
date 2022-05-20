@@ -9,8 +9,8 @@ export interface IUser {
   republic?: number;
   profileImage?: string;
   phone?: string;
-  isAdmin: boolean;
-  isActived: true;
+  isAdmin?: boolean;
+  isActived?: boolean;
 }
 export interface IUserUpdate {
   id?: number;

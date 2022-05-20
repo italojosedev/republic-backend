@@ -20,6 +20,8 @@ class UserController {
       const { profileImage, ...body } = await UserValidator.store(req.body);
       const { email } = body;
 
+      const {user: userAuth} = req.body; 
+
       const emailAlreadyExists = await UserRepository.emailExists(
         email.toLowerCase()
       );
@@ -28,7 +30,7 @@ class UserController {
         return res.status(400).json({ message: 'Email already exists' });
       }
 
-      let user: User = await UserRepository.store({ ...body });
+      let user: User = await UserRepository.store(body, userAuth.republic);
 
       if (profileImage) {
         const profileImageUrl = await Storage.uploadImg(profileImage, 'profile');
@@ -37,9 +39,9 @@ class UserController {
 
       user = await UserRepository.findOne({ where: { id: user.id } });
 
-      const token = await Token.generateUserToken(user.id);
+     
 
-      return res.status(200).json({ user, token });
+      return res.status(200).json(user);
     } catch (error) {
       console.log('UserController store error', error);
 

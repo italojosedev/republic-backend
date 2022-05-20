@@ -14,12 +14,6 @@ class UserRoutes {
   }
 
   getRoutes() {
-    // this.router
-    //   .route('/users')
-    //   .post(this.multer.single('profileImage'), UserController.store);
-
-    this.router.route('/signup/sendCode').post(UserController.generateCode);
-    this.router.route('/signup/validateCode').post(UserController.checkCode);
 
     this.router.route('/signin').post(UserController.signIn);
 
@@ -37,6 +31,7 @@ class UserRoutes {
     this.router
       .route('/users')
       .get(AuthMiddleware.user, UserController.list)
+      .post(AuthMiddleware.user, UserController.store)
       .put(
         AuthMiddleware.user,
         UserController.update

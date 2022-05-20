@@ -8,12 +8,8 @@ class UserValidator {
       password: Yup.string().min(8).max(16),
       firstName: Yup.string(),
       lastName: Yup.string(),
-      documentNumber: Yup.string(),
       phone: Yup.string(),
       bornDate: Yup.date(),
-      acceptedTermsOfUse: Yup.boolean(),
-      acceptedPrivacyPolicy: Yup.boolean(),
-      boatCategories: Yup.array().of(Yup.number()),
     });
 
     const body: IUser = await schema.validate(obj);
@@ -28,16 +24,7 @@ class UserValidator {
       email: Yup.string().email(),
       firstName: Yup.string(),
       lastName: Yup.string(),
-      documentNumber: Yup.string(),
-      phone: Yup.string(),
-      bornDate: Yup.date(),
-      addressCep: Yup.string(),
-      addressStreet: Yup.string(),
-      addressNumber: Yup.string(),
-      addressComplement: Yup.string(),
-      addressDistrict: Yup.string(),
-      addressCity: Yup.string(),
-      addressState: Yup.string(),
+      phone: Yup.string()
     });
 
     const body: IUserUpdate = await schema.validate(obj);
