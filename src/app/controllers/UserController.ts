@@ -30,7 +30,7 @@ class UserController {
         return res.status(400).json({ message: 'Email already exists' });
       }
 
-      let user: User = await UserRepository.store(body, userAuth.republic);
+      let user: User = await UserRepository.store(body, userAuth.republic.id);
 
       if (profileImage) {
         const profileImageUrl = await Storage.uploadImg(profileImage, 'profile');
@@ -38,8 +38,6 @@ class UserController {
       }
 
       user = await UserRepository.findOne({ where: { id: user.id } });
-
-     
 
       return res.status(200).json(user);
     } catch (error) {
@@ -70,7 +68,7 @@ class UserController {
 
       const user: User = await UserRepository.getById(+userAuth.id);
 
-      const republic: Republic = await RepublicRepository.findOneById(user.republic);
+      const republic: Republic = await RepublicRepository.findOneById(user.republic?.id || user.republic);
 
       const users = await UserRepository.listUserByRepublic(republic.id, +page, +itemsPerPage )
 
@@ -160,7 +158,7 @@ class UserController {
 
       const user = await UserRepository.findOneById(isValid);
 
-      const republic: Republic = await RepublicRepository.findOneById(user.republic);
+      const republic: Republic = await RepublicRepository.findOneById(user.republic.id);
 
       const token: string = await Token.generateUserToken(isValid);
 

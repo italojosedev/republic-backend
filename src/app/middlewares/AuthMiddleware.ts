@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import { EntityNotFoundError } from 'typeorm';
 import * as Yup from 'yup';
 import { Token } from '@utils';
-import { UserRepository, LesseeRepository } from '@repositories';
+import { UserRepository } from '@repositories';
 import { User } from '@models';
 
 import { Socket } from 'socket.io';
@@ -72,10 +72,6 @@ class AuthMiddleware {
 
 
       req.body.user = await UserRepository.getById(user.id);
-      
-
-      if (!req.body.user.lessee)
-        return res.status(401).json({ message: 'User not authorized' });
 
       return next();
     } catch (error) {
